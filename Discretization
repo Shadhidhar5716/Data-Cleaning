@@ -1,0 +1,256 @@
+# Importing the Libraries
+
+import pandas
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Loading the dataset
+
+data = pandas.read_csv('C:/Users/Shashi/Documents/DataSets/iris.csv')
+
+# Checking the datatypes
+
+data.dtypes
+
+# Checking the description of data
+
+data.describe()
+
+# Checking the information of data
+
+data.info()
+
+# 1st Business Moment : Measures of Central Tendency
+# Checking the Mean, Median, Mode
+
+data.mean()
+
+data.median()
+
+data.mode()
+
+data['Sepal.Length'].mean()
+data['Sepal.Length'].median()
+data['Sepal.Length'].mode()
+
+
+data['Sepal.Width'].mean()
+data['Sepal.Width'].median()
+data['Sepal.Width'].mode()
+
+
+data['Petal.Length'].mean()
+data['Petal.Length'].median()
+data['Petal.Length'].mode()
+
+data['Petal.Width'].mean()
+data['Petal.Width'].median()
+data['Petal.Width'].mode()
+
+data['Unnamed: 0'].mean()
+data['Unnamed: 0'].median()
+data['Unnamed: 0'].mode()
+
+
+# 2nd Business Moment : Measures of Disperstion
+# Checking the Variance, Standard Deviation
+
+data.var()
+
+data.std()
+
+# 3rd Business Moment : Measures of Skewness
+
+data.skew()
+
+# 4th Business Moment : Measures of Kurtisos
+
+data.kurt()
+
+
+# Graphical Representation
+# using boxplot to check for outliers, Histogram for spread of data
+
+plt.boxplot(data['Sepal.Length'])
+plt.hist(data['Sepal.Length'])
+
+
+plt.boxplot(data['Sepal.Width'])
+plt.hist(data['Sepal.Width'])
+
+
+plt.boxplot(data['Petal.Length'])
+plt.hist(data['Petal.Length'])
+
+
+plt.boxplot(data['Petal.Width'])
+plt.hist(data['Petal.Width'])
+
+plt.boxplot(data['Unnamed: 0'])
+plt.hist(data['Unnamed: 0'])
+
+
+# Using Scatter plot to check correalation of data
+
+plt.scatter(x=['Sepal.Length'],y=['Sepal.Width'])
+
+
+plt.scatter(x=['Sepal.Length'],y=['Petal.Width'])
+
+plt.scatter(x=['Petal.Width'],y=['Sepal.Length'])
+
+
+plt.scatter(x=['Petal.Length'],y=['Petal.Width'])
+
+
+
+# Outliers
+
+iqr = data['Sepal.Width'].quantile(0.75) - data['Sepal.Width'].quantile(0.25)
+
+upper_limit = data['Sepal.Width'].quantile(0.75) + (iqr * 1.5)
+lower_limit = data['Sepal.Width'].quantile(0.25) - (iqr * 1.5)
+
+
+Outlier_data = np.where(data['Sepal.Width'] > upper_limit, True, np.where(data['Sepal.Width'] < lower_limit, True, False ))
+
+
+# Trimming
+
+
+data_trimming = data.loc[~(Outlier_data)]
+
+data.shape, data_trimming.shape
+
+
+# Replace
+
+data['data_replace'] = pandas.DataFrame(np.where(data['Sepal.Width'] > upper_limit, upper_limit, np.where(data['Sepal.Width'] < lower_limit, lower_limit, data['Sepal.Width'] )))
+
+sns.boxplot(data.data_replace)
+
+
+# Winsorization
+
+
+from feature_engine.outliers import Winsorizer
+
+winsor_iqr = Winsorizer(capping_method='iqr',
+                          tail='both',
+                           fold=1.5,
+                            variables=('Sepal.Width'))
+
+data_i = winsor_iqr.fit_transform(data[['Sepal.Width']],)
+
+sns.boxplot(data_i['Sepal.Width'])
+
+
+# Gaussian
+
+winsor_gaussian = Winsorizer(capping_method='gaussian',
+                          tail='both',
+                           fold=3,
+                            variables=('Sepal.Width'))
+
+data_g = winsor_gaussian.fit_transform(data[['Sepal.Width']], )
+
+sns.boxplot(data_g['Sepal.Width'])
+
+
+# Percentile
+
+winsor_percentile = Winsorizer(capping_method='quantiles',
+                                 tail='both',
+                                  fold=0.05,
+                                   variables=('Sepal.Width'))
+
+data_p = winsor_percentile.fit_transform(data[['Sepal.Width']], )
+
+
+sns.boxplot(data_p['Sepal.Width'])
+
+
+
+
+data.dtypes
+
+
+# Checking the duplicates
+
+duplicate = data.duplicated()
+duplicate.sum()
+
+
+# Zero Variance
+
+
+data.var() == 0
+
+
+
+# Discretization 
+
+# Binaryization
+
+data.dtypes
+data['Sepal.Width_New'] = pandas.cut(data['Sepal.Width'],
+                                  bins = [min(data['Sepal.Width']), data['Sepal.Width'].mean(), max(data['Sepal.Width'])],
+                                  labels = ["Low", "High"])
+ 
+
+data['Sepal.Width_New'].count()
+
+
+data['Sepal.Width_New'] = pandas.cut(data['Sepal.Width'],
+                                  bins = [min(data['Sepal.Width']), data['Sepal.Width'].mean(), max(data['Sepal.Width'])],
+                                  include_lowest=True,
+                                  labels = ["Low", "High"])
+ 
+data['Sepal.Width_New'].count()
+
+data['Sepal.Width_New'].value_counts()
+
+
+data.dtypes
+
+
+data['Petal.Length_New'] = pandas.cut(data['Petal.Length'],
+                                  bins = [min(data['Petal.Length']), data['Petal.Length'].mean(), max(data['Petal.Length'])],
+                                  include_lowest=True,
+                                  labels = ["Low", "High"])
+ 
+data['Petal.Length_New'].count()
+
+
+data['Petal.Width_New'] = pandas.cut(data['Petal.Width'],
+                                  bins = [min(data['Petal.Width']), data['Petal.Width'].mean(), max(data['Petal.Width'])],
+                                  include_lowest=True,
+                                  labels = ["Low", "High"])
+ 
+data['Petal.Width_New'].count()
+
+
+data['Unnamed: 0_New'] = pandas.cut(data['Unnamed: 0'],
+                                  bins = [min(data['Unnamed: 0']), data['Unnamed: 0'].mean(), max(data['Unnamed: 0'])],
+                                  include_lowest=True,
+                                  labels = ["Low", "High"])
+
+
+data['Unnamed: 0_New'].count()
+
+
+
+
+
+data['Sepal.Length_New'] = pandas.cut(data['Sepal.Length'],
+                                  bins = [min(data['Unnamed: 0']), data['Unnamed: 0'].mean(), max(data['Unnamed: 0'])],
+                                  include_lowest=True,
+                                  labels = ["Low", "High"])
+
+
+data['Sepal.Length_New'].count()
+
+
+
+
