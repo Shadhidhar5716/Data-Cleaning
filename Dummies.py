@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 
+# Loading the dataset
+
 data = pandas.read_csv(r'C:/Users/Shashi/Documents/DataSets/animal_category.csv')
 
 data.dtypes
